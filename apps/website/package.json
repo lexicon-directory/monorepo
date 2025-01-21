@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "website",
+  "version": "0.0.1",
+  "description": "Website",
+  "type": "module",
+  "bin": "./src/bin.mjs",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "scripts": {
+    "start": "node ./src/bin.mjs"
+  }
+}
