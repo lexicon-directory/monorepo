@@ -3,15 +3,15 @@ applications:
   website:
     # Application source code directory
     source:
-      root: '/apps/website/'
+      root: '/'
 
     # The runtime the application uses.
     # Complete list of available runtimes: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#types
-    type: 'nodejs:20'
+    type: 'nodejs:22'
 
     # Choose which container profile (ratio CPU+RAM) your app will use. Default value comes from the image itself.
     # More information: https://docs.upsun.com/manage-resources/adjust-resources.html#adjust-a-container-profile
-    # container_profile:
+    container_profile: HIGH_CPU
 
     # The relationships of the application with services or other applications.
     # The left-hand side is the name of the relationship as it will be exposed
@@ -37,7 +37,8 @@ applications:
       commands:
         # The command to launch your app. If it terminates, it’s restarted immediately.
         # You can use the $PORT or the $SOCKET environment variable depending on the socket family of your upstream
-        start: 'node src/bin.mjs'
+        start: 'node apps/website/src/bin.mjs'
+
       # You can listen to a UNIX socket (unix) or a TCP port (tcp, default).
       # Whether your app should speak to the webserver via TCP or Unix socket. Defaults to tcp
       # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#where-to-listen
@@ -45,6 +46,8 @@ applications:
         # Whether your app should speak to the webserver via TCP or Unix socket. Defaults to tcp
         # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#where-to-listen
         socket_family: tcp
+        protocol: http
+
       # Each key in locations is a path on your site with a leading /.
       # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#locations
       locations:
@@ -64,10 +67,10 @@ applications:
     # access:
 
     # Variables to control the environment. More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#variables
-    # variables:
-    #   env:
-    #     # Add environment variables here that are static.
-    #     NODE_ENV: development
+    variables:
+      env:
+        # Add environment variables here that are static.
+        NODE_ENV: production
 
     # Outbound firewall rules for the application. More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#firewall
     # firewall:
@@ -92,15 +95,12 @@ applications:
       # More information: https://docs.upsun.com/create-apps/hooks/hooks-comparison.html#build-hook
       build: |
         set -eux
-
-        # Add build steps here.
-        # echo 'I am a build step'
+        corepack install
 
       # The deploy hook is run after the app container has been started, but before it has started accepting requests.
       # More information: https://docs.upsun.com/create-apps/hooks/hooks-comparison.html#deploy-hook
       deploy: |
         set -eux
-        # echo 'Put your deploy command here'
 
       # The post_deploy hook is run after the app container has been started and after it has started accepting requests.
       # More information: https://docs.upsun.com/create-apps/hooks/hooks-comparison.html#deploy-hook
@@ -109,9 +109,6 @@ applications:
     # Scheduled tasks for the app.
     # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#crons
     # crons:
-
-    # Customizations to your PHP or Lisp runtime. More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#runtime
-    # runtime:
 
     # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#additional-hosts
     # additional_hosts:
@@ -122,9 +119,9 @@ applications:
 # to power your Upsun project.
 # More information: https://docs.upsun.com/add-services.html
 # Full list of available services: https://docs.upsun.com/add-services.html#available-services
-# services:
-#   db:
-#     type: postgresql:14
+services:
+  # db:
+  #   type: postgresql:14
 
 # The routes of the project.
 #
@@ -135,8 +132,12 @@ routes:
   'https://{default}/':
     type: upstream
     upstream: 'website:http'
+    cache:
+      enabled: false
   # A basic redirect definition
   # More information: https://docs.upsun.com/define-routes.html#basic-redirect-definition
   'https://www.{default}':
     type: redirect
     to: 'https://{default}/'
+    cache:
+      enabled: false
